@@ -1,0 +1,19 @@
+--- a/sound/soc/codecs/rt286.c
++++ b/sound/soc/codecs/rt286.c
+@@ -34,6 +34,7 @@
+ #include "rt286.h"
+ 
+ #define RT286_VENDOR_ID 0x10ec0286
++#define RT288_VENDOR_ID 0x10ec0288
+ 
+ struct rt286_priv {
+ 	struct regmap *regmap;
+@@ -1210,7 +1211,7 @@ static int rt286_i2c_probe(struct i2c_client *i2c,
+ 
+ 	regmap_read(rt286->regmap,
+ 		RT286_GET_PARAM(AC_NODE_ROOT, AC_PAR_VENDOR_ID), &ret);
+-	if (ret != RT286_VENDOR_ID) {
++	if (ret != RT286_VENDOR_ID && ret != RT288_VENDOR_ID) {
+ 		dev_err(&i2c->dev,
+ 			"Device with ID register %x is not rt286\n", ret);
+ 		return -ENODEV;
