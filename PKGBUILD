@@ -30,9 +30,6 @@ validpgpkeys=(
 prepare() {
   cd "${srcdir}/${_srcname}"
 
-  # add upstream patch
-  #patch -p1 -i "${srcdir}/patch-${pkgver}"
-
   # Reverting a patch that messes with the touchpad
   msg "Patching source with touchpad fix patch"
   patch -Np1 -i "${srcdir}/touchpad.patch"
@@ -261,4 +258,4 @@ package_linux-xps13-9343-headers() {
 }
 
 # Global pkgdesc and depends are here so that they will be picked up by AUR
-pkgdesc='Linux Kernel and modules with audio driver and touchpad fixes for XPS13-9343.'
+pkgdesc='Linux kernel and modules with touchpad fix for XPS13-9343.'
