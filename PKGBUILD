@@ -3,8 +3,8 @@
 pkgname=linux-xps13-9343
 true && pkgname=(linux-xps13-9343 linux-xps13-9343-headers)
 _kernelname=-xps13-9343
-_srcname=linux-3.18
-pkgver=3.18.5
+_srcname=linux-3.19
+pkgver=3.19
 pkgrel=1
 arch=('x86_64')
 url="https://github.com/soleblaze/linux-xps13-9343-archlinux"
@@ -13,18 +13,16 @@ makedepends=('xmlto' 'docbook-xsl' 'kmod' 'inetutils' 'bc')
 options=('!strip')
 source=("https://www.kernel.org/pub/linux/kernel/v3.x/${_srcname}.tar.xz"
         "https://www.kernel.org/pub/linux/kernel/v3.x/${_srcname}.tar.sign"
-        "https://www.kernel.org/pub/linux/kernel/v3.x/patch-${pkgver}.xz"
-        "https://www.kernel.org/pub/linux/kernel/v3.x/patch-${pkgver}.sign"
         'config'
+        'config-min'
         'linux-xps13-9343.preset'
         'rt288.patch'
         'touchpad.patch'
         )
-sha256sums=('becc413cc9e6d7f5cc52a3ce66d65c3725bc1d1cc1001f4ce6c32b69eb188cbd'
+sha256sums=('be42511fe5321012bb4a2009167ce56a9e5fe362b4af43e8c371b3666859806c'
             'SKIP'
-            '9e261632e11f629705c3f1b2f07c611284e5f9972c42f6740131e8e2471c349a'
-            'SKIP'
-            'd3794c8b2cd11b71914b41f7a4e861369d4fa3c29fdd9e1d677ff0c2167eeb52'
+            '3c99c9ed1a4397b6be7046ca78c08db6e4592a61dd2c66f638361b34630774dc'
+            '73ed141c80247cabf7765c311fec6c3db184531db9a524f8675848476222e8a9'
             '9cf72e965ed8e766be3f6eed74f07a4f5cc696d7175b1ab8c608925202591ca2'
             '09cb4da2add20d158b3e680ebc40b3e251f0220fa4bf83c16a62494c398694b6'
             'f73cc06fdc32a295ec369d7734ca27d999a8377a74b0a43f8ad5d52a707472df')
@@ -49,8 +47,11 @@ prepare() {
 
   msg "Running make mrproper to clean source tree"
   make mrproper
-
-    cat "${srcdir}/config" > ./.config
+  
+  # This one is the default arch + SoC audio drivers
+  cat "${srcdir}/config" > ./.config
+  # This one is more minimal and may not include all the drivers you need
+  #cat "${srcdir}/config-minimal" > ./.config
 
   if [ "${_kernelname}" != "" ]; then
     sed -i "s|CONFIG_LOCALVERSION=.*|CONFIG_LOCALVERSION=\"${_kernelname}\"|g" ./.config
