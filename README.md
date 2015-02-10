@@ -9,9 +9,9 @@ This package currently reverts a patch that breaks the touchpad.  There is curre
 
 ## Installation Steps
 
-    $ git clone https://github.com/soleblaze/linux-xps13-9343
-    $ cd linux-xps13-9343
-    $ makepkg -s
-    $ sudo pacman -U *.pkg.tar.xz
+    git clone https://github.com/soleblaze/linux-xps13-9343
+    cd linux-xps13-9343
+    makepkg -s
+    sudo pacman -U *.pkg.tar.xz
 
 Note: You will need to set your bootloader to use this kernel on boot.
