@@ -14,7 +14,7 @@ options=('!strip')
 source=("https://www.kernel.org/pub/linux/kernel/v3.x/${_srcname}.tar.xz"
         "https://www.kernel.org/pub/linux/kernel/v3.x/${_srcname}.tar.sign"
         'config'
-        'config-min'
+        'config-minimal'
         'linux-xps13-9343.preset'
         'rt288.patch'
         'touchpad.patch'
