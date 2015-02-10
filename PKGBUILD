@@ -35,7 +35,7 @@ prepare() {
   cd "${srcdir}/${_srcname}"
 
   # add upstream patch
-  patch -p1 -i "${srcdir}/patch-${pkgver}"
+  #patch -p1 -i "${srcdir}/patch-${pkgver}"
 
   # apply the RT288 broadwell audio driver patch
   msg "Patching source with rt288 audio patch"
