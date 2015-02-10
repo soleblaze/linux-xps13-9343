@@ -1,0 +1,40 @@
+From 2a2aa272447d0ad4340c73db91bd8e995f6a0c3f Mon Sep 17 00:00:00 2001
+From: Benjamin Tissoires <benjamin.tissoires@redhat.com>
+Date: Tue, 10 Feb 2015 12:40:13 -0500
+Subject: [PATCH] HID: multitouch: force release of touches when i2c
+ communication is not reliable
+
+The Dell XPS 13 9343 (2015) shows that from time to time, i2c_hid misses
+some reports from the touchpad. This can lead to a freeze of the cursor
+in user space when the missing report contains a touch release information.
+
+Win 8 devices should have a contact count reliable, to we can safely
+release all touches that has not been seen in the current report.
+
+Signed-off-by: Benjamin Tissoires <benjamin.tissoires@redhat.com>
+---
+ drivers/hid/hid-multitouch.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/drivers/hid/hid-multitouch.c b/drivers/hid/hid-multitouch.c
+index f65e78b..48b051e 100644
+--- a/drivers/hid/hid-multitouch.c
++++ b/drivers/hid/hid-multitouch.c
+@@ -1021,6 +1021,14 @@ static int mt_probe(struct hid_device *hdev, const struct hid_device_id *id)
+ 	if (id->vendor == HID_ANY_ID && id->product == HID_ANY_ID)
+ 		td->serial_maybe = true;
+ 
++	if ((id->group == HID_GROUP_MULTITOUCH_WIN_8) && (hdev->bus == BUS_I2C))
++		/*
++		 * Some i2c sensors are not completely reliable with the i2c
++		 * communication. Force release of unseen touches in a report
++		 * to prevent bad behavior from user space.
++		 */
++		td->mtclass.quirks |= MT_QUIRK_NOT_SEEN_MEANS_UP;
++
+ 	ret = hid_parse(hdev);
+ 	if (ret != 0)
+ 		return ret;
+-- 
+2.1.0
+
