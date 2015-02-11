@@ -1,0 +1,215 @@
+--- a/sound/soc/codecs/rt286.c	2015-02-11 09:55:45.691665237 -0600
++++ b/sound/soc/codecs/rt286.c	2015-02-11 09:55:36.444986516 -0600
+@@ -34,6 +34,7 @@
+ #include "rt286.h"
+ 
+ #define RT286_VENDOR_ID 0x10ec0286
++#define RT288_VENDOR_ID 0x10ec0288
+ 
+ struct rt286_priv {
+ 	struct regmap *regmap;
+@@ -305,6 +306,8 @@
+ 	*hp = false;
+ 	*mic = false;
+ 
++	if (!rt286->codec)
++		return -EINVAL;
+ 	if (rt286->pdata.cbj_en) {
+ 		regmap_read(rt286->regmap, RT286_GET_HP_SENSE, &buf);
+ 		*hp = buf & 0x80000000;
+@@ -403,7 +406,8 @@
+ static int is_mclk_mode(struct snd_soc_dapm_widget *source,
+ 			 struct snd_soc_dapm_widget *sink)
+ {
+-	struct rt286_priv *rt286 = snd_soc_codec_get_drvdata(source->codec);
++	struct snd_soc_codec *codec = snd_soc_dapm_to_codec(source->dapm);
++	struct rt286_priv *rt286 = snd_soc_codec_get_drvdata(codec);
+ 
+ 	if (rt286->clk_id == RT286_SCLK_S_MCLK)
+ 		return 1;
+@@ -417,6 +421,8 @@
+ static const struct snd_kcontrol_new rt286_snd_controls[] = {
+ 	SOC_DOUBLE_R_TLV("DAC0 Playback Volume", RT286_DACL_GAIN,
+ 			    RT286_DACR_GAIN, 0, 0x7f, 0, out_vol_tlv),
++	SOC_DOUBLE_R("ADC0 Capture Switch", RT286_ADCL_GAIN,
++			    RT286_ADCR_GAIN, 7, 1, 1),
+ 	SOC_DOUBLE_R_TLV("ADC0 Capture Volume", RT286_ADCL_GAIN,
+ 			    RT286_ADCR_GAIN, 0, 0x7f, 0, out_vol_tlv),
+ 	SOC_SINGLE_TLV("AMIC Volume", RT286_MIC_GAIN,
+@@ -500,7 +506,7 @@
+ static int rt286_spk_event(struct snd_soc_dapm_widget *w,
+ 			    struct snd_kcontrol *kcontrol, int event)
+ {
+-	struct snd_soc_codec *codec = w->codec;
++	struct snd_soc_codec *codec = snd_soc_dapm_to_codec(w->dapm);
+ 
+ 	switch (event) {
+ 	case SND_SOC_DAPM_POST_PMU:
+@@ -522,7 +528,7 @@
+ static int rt286_set_dmic1_event(struct snd_soc_dapm_widget *w,
+ 				  struct snd_kcontrol *kcontrol, int event)
+ {
+-	struct snd_soc_codec *codec = w->codec;
++	struct snd_soc_codec *codec = snd_soc_dapm_to_codec(w->dapm);
+ 
+ 	switch (event) {
+ 	case SND_SOC_DAPM_POST_PMU:
+@@ -538,36 +544,10 @@
+ 	return 0;
+ }
+ 
+-static int rt286_adc_event(struct snd_soc_dapm_widget *w,
+-			     struct snd_kcontrol *kcontrol, int event)
+-{
+-	struct snd_soc_codec *codec = w->codec;
+-	unsigned int nid;
+-
+-	nid = (w->reg >> 20) & 0xff;
+-
+-	switch (event) {
+-	case SND_SOC_DAPM_POST_PMU:
+-		snd_soc_update_bits(codec,
+-			VERB_CMD(AC_VERB_SET_AMP_GAIN_MUTE, nid, 0),
+-			0x7080, 0x7000);
+-		break;
+-	case SND_SOC_DAPM_PRE_PMD:
+-		snd_soc_update_bits(codec,
+-			VERB_CMD(AC_VERB_SET_AMP_GAIN_MUTE, nid, 0),
+-			0x7080, 0x7080);
+-		break;
+-	default:
+-		return 0;
+-	}
+-
+-	return 0;
+-}
+-
+ static int rt286_vref_event(struct snd_soc_dapm_widget *w,
+ 			     struct snd_kcontrol *kcontrol, int event)
+ {
+-	struct snd_soc_codec *codec = w->codec;
++	struct snd_soc_codec *codec = snd_soc_dapm_to_codec(w->dapm);
+ 
+ 	switch (event) {
+ 	case SND_SOC_DAPM_PRE_PMU:
+@@ -585,7 +565,7 @@
+ static int rt286_ldo2_event(struct snd_soc_dapm_widget *w,
+ 			     struct snd_kcontrol *kcontrol, int event)
+ {
+-	struct snd_soc_codec *codec = w->codec;
++	struct snd_soc_codec *codec = snd_soc_dapm_to_codec(w->dapm);
+ 
+ 	switch (event) {
+ 	case SND_SOC_DAPM_POST_PMU:
+@@ -604,7 +584,7 @@
+ static int rt286_mic1_event(struct snd_soc_dapm_widget *w,
+ 			     struct snd_kcontrol *kcontrol, int event)
+ {
+-	struct snd_soc_codec *codec = w->codec;
++	struct snd_soc_codec *codec = snd_soc_dapm_to_codec(w->dapm);
+ 
+ 	switch (event) {
+ 	case SND_SOC_DAPM_PRE_PMU:
+@@ -667,12 +647,10 @@
+ 	SND_SOC_DAPM_ADC("ADC 1", NULL, SND_SOC_NOPM, 0, 0),
+ 
+ 	/* ADC Mux */
+-	SND_SOC_DAPM_MUX_E("ADC 0 Mux", RT286_SET_POWER(RT286_ADC_IN1), 0, 1,
+-		&rt286_adc0_mux, rt286_adc_event, SND_SOC_DAPM_PRE_PMD |
+-		SND_SOC_DAPM_POST_PMU),
+-	SND_SOC_DAPM_MUX_E("ADC 1 Mux", RT286_SET_POWER(RT286_ADC_IN2), 0, 1,
+-		&rt286_adc1_mux, rt286_adc_event, SND_SOC_DAPM_PRE_PMD |
+-		SND_SOC_DAPM_POST_PMU),
++	SND_SOC_DAPM_MUX("ADC 0 Mux", RT286_SET_POWER(RT286_ADC_IN1), 0, 1,
++		&rt286_adc0_mux),
++	SND_SOC_DAPM_MUX("ADC 1 Mux", RT286_SET_POWER(RT286_ADC_IN2), 0, 1,
++		&rt286_adc1_mux),
+ 
+ 	/* Audio Interface */
+ 	SND_SOC_DAPM_AIF_IN("AIF1RX", "AIF1 Playback", 0, SND_SOC_NOPM, 0, 0),
+@@ -1194,6 +1172,7 @@
+ 
+ static const struct i2c_device_id rt286_i2c_id[] = {
+ 	{"rt286", 0},
++	{"rt288", 0},
+ 	{}
+ };
+ MODULE_DEVICE_TABLE(i2c, rt286_i2c_id);
+@@ -1214,6 +1193,17 @@
+ 	{ }
+ };
+ 
++static struct dmi_system_id dmi_dell_dino[] = {
++	{
++		.ident = "Dell Dino",
++		.matches = {
++			DMI_MATCH(DMI_SYS_VENDOR, "Dell Inc."),
++			DMI_MATCH(DMI_BOARD_NAME, "0144P8")
++		}
++	},
++	{ }
++};
++
+ static int rt286_i2c_probe(struct i2c_client *i2c,
+ 			   const struct i2c_device_id *id)
+ {
+@@ -1236,7 +1226,7 @@
+ 
+ 	regmap_read(rt286->regmap,
+ 		RT286_GET_PARAM(AC_NODE_ROOT, AC_PAR_VENDOR_ID), &ret);
+-	if (ret != RT286_VENDOR_ID) {
++	if (ret != RT286_VENDOR_ID && ret != RT288_VENDOR_ID) {
+ 		dev_err(&i2c->dev,
+ 			"Device with ID register %x is not rt286\n", ret);
+ 		return -ENODEV;
+@@ -1249,7 +1239,8 @@
+ 	if (pdata)
+ 		rt286->pdata = *pdata;
+ 
+-	if (dmi_check_system(force_combo_jack_table))
++	if (dmi_check_system(force_combo_jack_table) ||
++		dmi_check_system(dmi_dell_dino))
+ 		rt286->pdata.cbj_en = true;
+ 
+ 	regmap_write(rt286->regmap, RT286_SET_AUDIO_POWER, AC_PWRST_D3);
+@@ -1288,6 +1279,17 @@
+ 	regmap_update_bits(rt286->regmap, RT286_DEPOP_CTRL3, 0xf777, 0x4737);
+ 	regmap_update_bits(rt286->regmap, RT286_DEPOP_CTRL4, 0x00ff, 0x003f);
+ 
++	if (dmi_check_system(dmi_dell_dino)) {
++		regmap_update_bits(rt286->regmap,
++			RT286_SET_GPIO_MASK, 0x40, 0x40);
++		regmap_update_bits(rt286->regmap,
++			RT286_SET_GPIO_DIRECTION, 0x40, 0x40);
++		regmap_update_bits(rt286->regmap,
++			RT286_SET_GPIO_DATA, 0x40, 0x40);
++		regmap_update_bits(rt286->regmap,
++			RT286_GPIO_CTRL, 0xc, 0x8);
++	}
++
+ 	if (rt286->i2c->irq) {
+ 		ret = request_threaded_irq(rt286->i2c->irq, NULL, rt286_irq,
+ 			IRQF_TRIGGER_HIGH | IRQF_ONESHOT, "rt286", rt286);
+--- a/sound/soc/codecs/rt286.h	2015-02-11 09:55:45.691665237 -0600
++++ b/sound/soc/codecs/rt286.h	2015-02-11 09:55:36.444986516 -0600
+@@ -117,6 +117,12 @@
+ 	VERB_CMD(AC_VERB_SET_COEF_INDEX, RT286_VENDOR_REGISTERS, 0)
+ #define RT286_PROC_COEF\
+ 	VERB_CMD(AC_VERB_SET_PROC_COEF, RT286_VENDOR_REGISTERS, 0)
++#define RT286_SET_GPIO_MASK\
++	VERB_CMD(AC_VERB_SET_GPIO_MASK, RT286_AUDIO_FUNCTION_GROUP, 0)
++#define RT286_SET_GPIO_DIRECTION\
++	VERB_CMD(AC_VERB_SET_GPIO_DIRECTION, RT286_AUDIO_FUNCTION_GROUP, 0)
++#define RT286_SET_GPIO_DATA\
++	VERB_CMD(AC_VERB_SET_GPIO_DATA, RT286_AUDIO_FUNCTION_GROUP, 0)
+ 
+ /* Index registers */
+ #define RT286_A_BIAS_CTRL1	0x01
+@@ -131,6 +137,7 @@
+ #define RT286_POWER_CTRL3	0x0f
+ #define RT286_MIC1_DET_CTRL	0x19
+ #define RT286_MISC_CTRL1	0x20
++#define RT286_GPIO_CTRL		0x29
+ #define RT286_IRQ_CTRL		0x33
+ #define RT286_PLL_CTRL1		0x49
+ #define RT286_CBJ_CTRL1		0x4f

@@ -15,12 +15,14 @@ source=("https://www.kernel.org/pub/linux/kernel/v3.x/${_srcname}.tar.xz"
         "https://www.kernel.org/pub/linux/kernel/v3.x/${_srcname}.tar.sign"
         'config'
         'linux-xps13-9343.preset'
+        'rt286.patch'
         'touchpad.patch'
         )
 sha256sums=('be42511fe5321012bb4a2009167ce56a9e5fe362b4af43e8c371b3666859806c'
             'SKIP'
             '73ed141c80247cabf7765c311fec6c3db184531db9a524f8675848476222e8a9'
             '9cf72e965ed8e766be3f6eed74f07a4f5cc696d7175b1ab8c608925202591ca2'
+            'd28778b9b00bfe8958d8f07d40bbaea6c4b88557cdb0d81c61f8520ef876d353'
             'f73cc06fdc32a295ec369d7734ca27d999a8377a74b0a43f8ad5d52a707472df')
 validpgpkeys=(
               'ABAF11C65A2970B130ABE3C479BE3E4300411886' # Linus Torvalds
@@ -29,6 +31,10 @@ validpgpkeys=(
 	    
 prepare() {
   cd "${srcdir}/${_srcname}"
+
+  # Patch rt286 sound drivers to work with rt288
+  msg "Patching source with rt286 fix"
+  patch -Np1 -i "${srcdir}/rt286.patch"
 
   # Reverting a patch that messes with the touchpad
   msg "Patching source with touchpad fix patch"
