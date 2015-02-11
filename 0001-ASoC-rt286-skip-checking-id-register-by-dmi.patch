@@ -1,0 +1,58 @@
+From 849af002e9bfd4bdfe68962d0a5d74b21da15c60 Mon Sep 17 00:00:00 2001
+From: "Shih-Yuan Lee (FourDollars)" <sylee@canonical.com>
+Date: Thu, 5 Feb 2015 11:36:32 +0800
+Subject: [PATCH] ASoC: rt286: skip checking id register by dmi
+
+Dell XPS 13 (2015) returns the wrong id register.
+
+Signed-off-by: Shih-Yuan Lee (FourDollars) <sylee@canonical.com>
+---
+ sound/soc/codecs/rt286.c | 25 +++++++++++++++++++------
+ 1 file changed, 19 insertions(+), 6 deletions(-)
+
+diff --git a/sound/soc/codecs/rt286.c b/sound/soc/codecs/rt286.c
+index 1d1c7f8..ad07662 100644
+--- a/sound/soc/codecs/rt286.c
++++ b/sound/soc/codecs/rt286.c
+@@ -1214,6 +1214,17 @@ static struct dmi_system_id force_combo_jack_table[] = {
+ 	{ }
+ };
+ 
++static struct dmi_system_id skip_checking_id_register_table[] = {
++	{
++	 .ident = "Dell XPS 13 (2015)",
++	 .matches = {
++		DMI_MATCH(DMI_BOARD_VENDOR, "Dell Inc."),
++		DMI_MATCH(DMI_PRODUCT_NAME, "XPS 13 9343"),
++		},
++	},
++	{ }
++};
++
+ static int rt286_i2c_probe(struct i2c_client *i2c,
+ 			   const struct i2c_device_id *id)
+ {
+@@ -1234,12 +1245,14 @@ static int rt286_i2c_probe(struct i2c_client *i2c,
+ 		return ret;
+ 	}
+ 
+-	regmap_read(rt286->regmap,
+-		RT286_GET_PARAM(AC_NODE_ROOT, AC_PAR_VENDOR_ID), &ret);
+-	if (ret != RT286_VENDOR_ID) {
+-		dev_err(&i2c->dev,
+-			"Device with ID register %x is not rt286\n", ret);
+-		return -ENODEV;
++	if (!dmi_check_system(skip_checking_id_register_table)) {
++		regmap_read(rt286->regmap,
++			RT286_GET_PARAM(AC_NODE_ROOT, AC_PAR_VENDOR_ID), &ret);
++		if (ret != RT286_VENDOR_ID) {
++			dev_err(&i2c->dev,
++				"Device with ID register %x is not rt286\n", ret);
++			return -ENODEV;
++		}
+ 	}
+ 
+ 	rt286->index_cache = rt286_index_def;
+-- 
+1.9.1
+
