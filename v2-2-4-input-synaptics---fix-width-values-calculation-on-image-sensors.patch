@@ -1,0 +1,39 @@
+diff --git a/drivers/input/mouse/synaptics.c b/drivers/input/mouse/synaptics.c
+index 4d22ebd..918a727 100644
+--- a/drivers/input/mouse/synaptics.c
++++ b/drivers/input/mouse/synaptics.c
+@@ -585,10 +585,12 @@ static void synaptics_parse_agm(const unsigned char buf[],
+ 	switch (agm_packet_type) {
+ 	case 1:
+ 		/* Gesture packet: (x, y, z) half resolution */
+-		agm->w = hw->w;
+-		agm->x = (((buf[4] & 0x0f) << 8) | buf[1]) << 1;
+-		agm->y = (((buf[4] & 0xf0) << 4) | buf[2]) << 1;
+-		agm->z = ((buf[3] & 0x30) | (buf[5] & 0x0f)) << 2;
++		agm->w = ((buf[1] & 0x01) |
++			  ((buf[2] & 0x01) << 1) |
++			  ((buf[5] & 0x01) << 2)) + 8;
++		agm->x = (((buf[4] & 0x0f) << 8) | (buf[1] & 0xfe)) << 1;
++		agm->y = (((buf[4] & 0xf0) << 4) | (buf[2] & 0xfe)) << 1;
++		agm->z = ((buf[3] & 0x30) | (buf[5] & 0x0e)) << 2;
+ 		break;
+ 
+ 	case 2:
+@@ -852,6 +854,17 @@ static void synaptics_image_sensor_process(struct psmouse *psmouse,
+ 	else
+ 		num_fingers = 4;
+ 
++	/* When multiple fingers are on the TouchPad, the width is encoded in
++	 * X, Y and Z */
++	if (sgm->w == 0 || sgm->w == 1) {
++		sgm->w = (((sgm->x & BIT(1)) >> 1) |
++			  (sgm->y & BIT(1)) |
++			  ((sgm->z & BIT(0)) << 2)) + 8;
++		sgm->x &= ~BIT(1);
++		sgm->y &= ~BIT(1);
++		sgm->z &= ~BIT(0);
++	}
++
+ 	/* Send resulting input events to user space */
+ 	synaptics_report_mt_data(psmouse, sgm, num_fingers);
+ }
