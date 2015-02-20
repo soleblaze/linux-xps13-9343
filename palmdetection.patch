@@ -1,0 +1,89 @@
+--- a/drivers/input/mouse/synaptics.c
++++ b/drivers/input/mouse/synaptics.c
+@@ -814,6 +814,8 @@  static void synaptics_report_slot(struct input_dev *dev, int slot,
+ 	input_report_abs(dev, ABS_MT_POSITION_X, hw->x);
+ 	input_report_abs(dev, ABS_MT_POSITION_Y, synaptics_invert_y(hw->y));
+ 	input_report_abs(dev, ABS_MT_PRESSURE, hw->z);
++	if (hw->w >= 4)
++		input_report_abs(dev, ABS_MT_TOUCH_MAJOR, hw->w);
+ }
+ 
+ static void synaptics_report_mt_data(struct psmouse *psmouse,
+@@ -1462,8 +1464,13 @@  static void set_input_params(struct psmouse *psmouse,
+ 					INPUT_MT_TRACK : INPUT_MT_SEMI_MT));
+ 	}
+ 
+-	if (SYN_CAP_PALMDETECT(priv->capabilities))
+-		input_set_abs_params(dev, ABS_TOOL_WIDTH, 0, 15, 0, 0);
++	if (SYN_CAP_PALMDETECT(priv->capabilities)) {
++		if (SYN_CAP_IMAGE_SENSOR(priv->ext_cap_0c))
++			input_set_abs_params(dev,
++					     ABS_MT_TOUCH_MAJOR, 4, 15, 0, 0);
++		else
++			input_set_abs_params(dev, ABS_TOOL_WIDTH, 0, 15, 0, 0);
++	}
+ 
+ 	__set_bit(BTN_TOUCH, dev->keybit);
+ 	__set_bit(BTN_TOOL_FINGER, dev->keybit);
+
+
+--- a/drivers/input/mouse/synaptics.c
++++ b/drivers/input/mouse/synaptics.c
+@@ -593,7 +593,9 @@ static void synaptics_parse_agm(const unsigned char buf[],
+        switch (agm_packet_type) {
+        case 1:
+                /* Gesture packet: (x, y, z) half resolution */
+-               agm->w = hw->w;
++               agm->w = ((buf[1] & 0x01) |
++                         ((buf[2] & 0x01) << 1) |
++                         ((buf[5] & 0x01) << 2)) + 8;
+                agm->x = (((buf[4] & 0x0f) << 8) | buf[1]) << 1;
+                agm->y = (((buf[4] & 0xf0) << 4) | buf[2]) << 1;
+                agm->z = ((buf[3] & 0x30) | (buf[5] & 0x0f)) << 1;
+
+
+--- a/drivers/input/input-mt.c
++++ b/drivers/input/input-mt.c
+@@ -65,6 +65,7 @@ int input_mt_init_slots(struct input_dev *dev, unsigned int num_slots,
+ 		copy_abs(dev, ABS_X, ABS_MT_POSITION_X);
+ 		copy_abs(dev, ABS_Y, ABS_MT_POSITION_Y);
+ 		copy_abs(dev, ABS_PRESSURE, ABS_MT_PRESSURE);
++		copy_abs(dev, ABS_TOOL_WIDTH, ABS_MT_TOUCH_MAJOR);
+ 	}
+ 	if (flags & INPUT_MT_POINTER) {
+ 		__set_bit(BTN_TOOL_FINGER, dev->keybit);
+@@ -229,9 +230,17 @@ void input_mt_report_pointer_emulation(struct input_dev *dev, bool use_count)
+ 			int p = input_mt_get_value(oldest, ABS_MT_PRESSURE);
+ 			input_event(dev, EV_ABS, ABS_PRESSURE, p);
+ 		}
++
++		if (test_bit(ABS_MT_TOUCH_MAJOR, dev->absbit)) {
++			int w = input_mt_get_value(oldest, ABS_MT_TOUCH_MAJOR);
++			input_event(dev, EV_ABS, ABS_TOOL_WIDTH, w);
++		}
+ 	} else {
+ 		if (test_bit(ABS_MT_PRESSURE, dev->absbit))
+ 			input_event(dev, EV_ABS, ABS_PRESSURE, 0);
++
++		if (test_bit(ABS_MT_TOUCH_MAJOR, dev->absbit))
++			input_event(dev, EV_ABS, ABS_TOOL_WIDTH, 0);
+ 	}
+ }
+ EXPORT_SYMBOL(input_mt_report_pointer_emulation);
+diff --git a/drivers/input/mouse/synaptics.c b/drivers/input/mouse/synaptics.c
+index 5ff4c5b..3858493 100644
+--- a/drivers/input/mouse/synaptics.c
++++ b/drivers/input/mouse/synaptics.c
+@@ -1467,11 +1467,10 @@ static void set_input_params(struct psmouse *psmouse,
+ 	}
+ 
+ 	if (SYN_CAP_PALMDETECT(priv->capabilities)) {
++		input_set_abs_params(dev, ABS_TOOL_WIDTH, 0, 15, 0, 0);
+ 		if (SYN_CAP_IMAGE_SENSOR(priv->ext_cap_0c))
+ 			input_set_abs_params(dev,
+ 					     ABS_MT_TOUCH_MAJOR, 4, 15, 0, 0);
+-		else
+-			input_set_abs_params(dev, ABS_TOOL_WIDTH, 0, 15, 0, 0);
+ 	}
+ 
+ 	__set_bit(BTN_TOUCH, dev->keybit);
