@@ -1,0 +1,53 @@
+diff --git a/drivers/input/mouse/synaptics.c b/drivers/input/mouse/synaptics.c
+index 7e705ee..4dc456c 100644
+--- a/drivers/input/mouse/synaptics.c
++++ b/drivers/input/mouse/synaptics.c
+@@ -1244,6 +1244,21 @@ static int synaptics_reconnect(struct psmouse *psmouse)
+ 	return 0;
+ }
+ 
++static bool dell_ec_glitch;
++
++static const struct dmi_system_id dell_dmi_table[] __initconst = {
++#if defined(CONFIG_DMI) && defined(CONFIG_X86)
++	{
++		/* XPS 13 (2015) */
++		.matches = {
++			DMI_MATCH(DMI_SYS_VENDOR, "Dell Inc."),
++			DMI_MATCH(DMI_PRODUCT_NAME, "XPS 13 9343"),
++		},
++	},
++	{ }
++#endif
++};
++
+ static bool impaired_toshiba_kbc;
+ 
+ static const struct dmi_system_id toshiba_dmi_table[] __initconst = {
+@@ -1334,6 +1349,8 @@ void __init synaptics_module_init(void)
+ 	 * so we have to resort to checking DMI.
+ 	 */
+ 	is_forcepad = dmi_check_system(forcepad_dmi_table);
++	dell_ec_glitch = dmi_check_system(dell_dmi_table);
++
+ }
+ 
+ static int __synaptics_init(struct psmouse *psmouse, bool absolute_mode)
+@@ -1426,6 +1443,17 @@ static int __synaptics_init(struct psmouse *psmouse, bool absolute_mode)
+ 		psmouse->rate = 40;
+ 	}
+ 
++	/*
++	 * Some Dell touchpads have a problem where the EC will glitch causing
++	 * bad packets that are otherwise harmless unless they cause psmouse
++	 * to reset.
++	 */
++	if (psmouse->resetafter > 0 && dell_ec_glitch) {
++		psmouse_info(psmouse, "Dell %s detected, disabling tpad reset.\n",
++			dmi_get_system_info(DMI_PRODUCT_NAME));
++		psmouse->resetafter = 0;
++	}
++
+ 	if (!priv->absolute_mode && SYN_ID_DISGEST_SUPPORTED(priv->identity)) {
+ 		err = device_create_file(&psmouse->ps2dev.serio->dev,
+ 					 &psmouse_attr_disable_gesture.dattr);
