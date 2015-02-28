@@ -19,7 +19,7 @@ source=("https://www.kernel.org/pub/linux/kernel/v4.x/testing/${_srcname}.tar.xz
         )
 sha256sums=('147be26c7ac47a7542dcd1888561b5549095297b3f68474b4b06473b1fa82466'
             'SKIP'
-            'b2c15c82cb01d025e2634a6111c08be0b1345aa05120b82af7152ca9e89370e0'
+            'da054d208b2773801824588aa9e622405ec8afb679c404a2747f9e879e2ef141'
             '9cf72e965ed8e766be3f6eed74f07a4f5cc696d7175b1ab8c608925202591ca2'
             'f73cc06fdc32a295ec369d7734ca27d999a8377a74b0a43f8ad5d52a707472df')
 validpgpkeys=(
