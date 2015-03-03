@@ -15,13 +15,11 @@ source=("https://www.kernel.org/pub/linux/kernel/v4.x/testing/${_srcname}.tar.xz
         "https://www.kernel.org/pub/linux/kernel/v4.x/testing/${_srcname}.tar.sign"
         'config'
         'linux-xps13-9343.preset'
-        'touchpad.patch'
         )
 sha256sums=('147be26c7ac47a7542dcd1888561b5549095297b3f68474b4b06473b1fa82466'
             'SKIP'
             'da054d208b2773801824588aa9e622405ec8afb679c404a2747f9e879e2ef141'
             '9cf72e965ed8e766be3f6eed74f07a4f5cc696d7175b1ab8c608925202591ca2'
-            'f73cc06fdc32a295ec369d7734ca27d999a8377a74b0a43f8ad5d52a707472df')
 validpgpkeys=(
               'ABAF11C65A2970B130ABE3C479BE3E4300411886' # Linus Torvalds
               '647F28654894E3BD457199BE38DBBDC86092693E' # Greg Kroah-Hartman
@@ -29,10 +27,6 @@ validpgpkeys=(
 	    
 prepare() {
   cd "${srcdir}/${_srcname}"
-
-  # Reverting a patch that messes with the touchpad
-  msg "Patching source with touchpad fix patch"
-  patch -Np1 -i "${srcdir}/touchpad.patch"
 
   msg "Running make mrproper to clean source tree"
   make mrproper
