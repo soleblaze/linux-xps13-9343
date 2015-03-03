@@ -19,7 +19,7 @@ source=("https://www.kernel.org/pub/linux/kernel/v4.x/testing/${_srcname}.tar.xz
 sha256sums=('49ca726462ad6f1d233d7310df2796c9d45b49878e845f6e93ad1df1c2a052da'
             'SKIP'
             'da054d208b2773801824588aa9e622405ec8afb679c404a2747f9e879e2ef141'
-            '9cf72e965ed8e766be3f6eed74f07a4f5cc696d7175b1ab8c608925202591ca2'
+            '9cf72e965ed8e766be3f6eed74f07a4f5cc696d7175b1ab8c608925202591ca2')
 validpgpkeys=(
               'ABAF11C65A2970B130ABE3C479BE3E4300411886' # Linus Torvalds
               '647F28654894E3BD457199BE38DBBDC86092693E' # Greg Kroah-Hartman
