@@ -3,8 +3,8 @@
 pkgname=linux-xps13-9343
 true && pkgname=(linux-xps13-9343 linux-xps13-9343-headers)
 _kernelname=-xps13-9343
-_srcname=linux-4.0-rc2
-pkgver=4.0rc2
+_srcname=linux-4.0-rc3
+pkgver=4.0rc3
 pkgrel=1
 arch=('x86_64')
 url="https://github.com/soleblaze/linux-xps13-9343-archlinux"
@@ -16,7 +16,7 @@ source=("https://www.kernel.org/pub/linux/kernel/v4.x/testing/${_srcname}.tar.xz
         'config'
         'linux-xps13-9343.preset'
         )
-sha256sums=('49ca726462ad6f1d233d7310df2796c9d45b49878e845f6e93ad1df1c2a052da'
+sha256sums=('6de5f352b3701e4fb40e2a5177426fee4921354e577ab0722cdbf2d3b2332de9'
             'SKIP'
             'da054d208b2773801824588aa9e622405ec8afb679c404a2747f9e879e2ef141'
             '9cf72e965ed8e766be3f6eed74f07a4f5cc696d7175b1ab8c608925202591ca2')
