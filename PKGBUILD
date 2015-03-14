@@ -3,25 +3,27 @@
 pkgname=linux-xps13-9343
 true && pkgname=(linux-xps13-9343 linux-xps13-9343-headers)
 _kernelname=-xps13-9343
-_srcname=linux-3.19
-pkgver=3.19
+_srcname=linux-4.0-rc3
+pkgver=4.0rc3
 pkgrel=1
 arch=('x86_64')
 url="https://github.com/soleblaze/linux-xps13-9343-archlinux"
 license=('GPL2')
 makedepends=('xmlto' 'docbook-xsl' 'kmod' 'inetutils' 'bc')
 options=('!strip')
-source=("https://www.kernel.org/pub/linux/kernel/v3.x/${_srcname}.tar.xz"
-        "https://www.kernel.org/pub/linux/kernel/v3.x/${_srcname}.tar.sign"
+source=("https://www.kernel.org/pub/linux/kernel/v4.x/testing/${_srcname}.tar.xz"
+        "https://www.kernel.org/pub/linux/kernel/v4.x/testing/${_srcname}.tar.sign"
         'config'
         'linux-xps13-9343.preset'
-        'touchpad.patch'
+        'acpi2.patch'
+        'rt286.patch'
         )
-sha256sums=('be42511fe5321012bb4a2009167ce56a9e5fe362b4af43e8c371b3666859806c'
+sha256sums=('6de5f352b3701e4fb40e2a5177426fee4921354e577ab0722cdbf2d3b2332de9'
             'SKIP'
-            '73ed141c80247cabf7765c311fec6c3db184531db9a524f8675848476222e8a9'
+            'da054d208b2773801824588aa9e622405ec8afb679c404a2747f9e879e2ef141'
             '9cf72e965ed8e766be3f6eed74f07a4f5cc696d7175b1ab8c608925202591ca2'
-            'f73cc06fdc32a295ec369d7734ca27d999a8377a74b0a43f8ad5d52a707472df')
+            'affd92d3ec9f46ab78665cd925cefec63b08291e1d851785507b3bd7f710a152'
+            'bb07fc630301fcf3b5fd7b833b4df172833979b32b1db57703d3c0a6a0bcc65a')
 validpgpkeys=(
               'ABAF11C65A2970B130ABE3C479BE3E4300411886' # Linus Torvalds
               '647F28654894E3BD457199BE38DBBDC86092693E' # Greg Kroah-Hartman
@@ -30,9 +32,13 @@ validpgpkeys=(
 prepare() {
   cd "${srcdir}/${_srcname}"
 
-  # Reverting a patch that messes with the touchpad
-  msg "Patching source with touchpad fix patch"
-  patch -Np1 -i "${srcdir}/touchpad.patch"
+  # Patch ACPI _REV to always return 2
+  msg "Patching acconfig.h"
+  patch -Np1 -i "${srcdir}/acpi2.patch"
+
+  # Patch rt286.c to use product name instead of board name for DINO
+  msg "Patching rt286.c"
+  patch -Np1 -i "${srcdir}/rt286.patch"
 
   msg "Running make mrproper to clean source tree"
   make mrproper
