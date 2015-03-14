@@ -1,11 +1,10 @@
 # XPS 13 9343 Kernel Package
 
-This package currently reverts a patch that breaks the touchpad.  There is currently work being done by others to properly fix this issue for future kernel releases. A sound fix will be added when one is available.
+This package currently patches 4.0-rc3 in order to get sound working correctly.  SPX Mux needs to be set to Front in order for sound to work properly.
 
 ## Not yet working
 
-* sound
-* multi-touch
+* palm detection
 
 ## Installation Steps
 
