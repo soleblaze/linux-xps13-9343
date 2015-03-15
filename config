@@ -1,6 +1,6 @@
 #
 # Automatically generated file; DO NOT EDIT.
-# Linux/x86 4.0.0-rc1 Kernel Configuration
+# Linux/x86 4.0.0-rc3 Kernel Configuration
 #
 CONFIG_64BIT=y
 CONFIG_X86_64=y
@@ -4009,7 +4009,7 @@ CONFIG_MMC_SDHCI_PLTFM=m
 # CONFIG_MMC_VUB300 is not set
 CONFIG_MMC_USHC=m
 # CONFIG_MMC_USDHI6ROL0 is not set
-# CONFIG_MMC_REALTEK_PCI is not set
+CONFIG_MMC_REALTEK_PCI=m
 CONFIG_MMC_REALTEK_USB=m
 # CONFIG_MMC_TOSHIBA_PCI is not set
 CONFIG_MEMSTICK=m
@@ -4445,7 +4445,6 @@ CONFIG_CLKBLD_I8253=y
 # CONFIG_SH_TIMER_MTU2 is not set
 # CONFIG_SH_TIMER_TMU is not set
 # CONFIG_EM_TIMER_STI is not set
-# CONFIG_ASM9260_TIMER is not set
 # CONFIG_MAILBOX is not set
 CONFIG_IOMMU_API=y
 CONFIG_IOMMU_SUPPORT=y
