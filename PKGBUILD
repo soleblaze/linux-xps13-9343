@@ -1,27 +1,33 @@
 # Maintainer: Kevin Burns <soleblaze_at_skyshadows_dot_net>
 
-pkgname=linux-xps13-9343
-true && pkgname=(linux-xps13-9343 linux-xps13-9343-headers)
-_kernelname=-xps13-9343
-_srcname=linux-4.0
-pkgver=4.0
+pkgname=linux-xps13-9343-git
+true && pkgname=(linux-xps13-9343-git linux-xps13-9343-headers-git)
+_kernelname=-xps13-9343-git
+_srcname=linux
+pkgver=v4.0.r8110.g64fb1d0
 pkgrel=1
 arch=('x86_64')
-url="https://github.com/soleblaze/linux-xps13-9343-archlinux"
+url="https://github.com/soleblaze/linux-xps13-9343-git-archlinux"
 license=('GPL2')
 makedepends=('xmlto' 'docbook-xsl' 'kmod' 'inetutils' 'bc')
 options=('!strip')
-source=("https://www.kernel.org/pub/linux/kernel/v4.x/${_srcname}.tar.xz"
-        "https://www.kernel.org/pub/linux/kernel/v4.x/${_srcname}.tar.sign"
+source=('git+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git'
         'config'
-        'linux-xps13-9343.preset'
+        'linux-xps13-9343-git.preset'
         'acpi2.patch'
+        'usb-hub.patch'
+        'libata1.patch'
+        'libata2.patch'
+        'libata3.patch'
         )
-sha256sums=('0f2f7d44979bc8f71c4fc5d3308c03499c26a824dd311fdf6eef4dee0d7d5991'
-            'SKIP'
-            '3ca12febfa74f25426a68f6d1934f3dfa04c6e11e62d34fc3d30af5f66c023d1'
-            '9cf72e965ed8e766be3f6eed74f07a4f5cc696d7175b1ab8c608925202591ca2'
+sha256sums=('SKIP'
+            '608065e15788df7ecd6d101284886ade5194b38ede865108b4e7a82936c101aa'
+            '66f096df2183efcc36d10e74b145b46bbca1986a33a72e8e9f688afcea37bdc2'
             'affd92d3ec9f46ab78665cd925cefec63b08291e1d851785507b3bd7f710a152'
+            '59b84757b6aed70bb0cfec993ed758f42853bccda76edeaf9bebec1eff51c0bc'
+            '65996661b01e55b5ad9383bc57073b2a62de39b0bd3f58d589ecccdc0942754a'
+            'af01200ecb94d2c87f9f1fbf5fd46962125a552f50826d4b5707ec89a930e14d'
+            '377d801f2003660d5c09b06157419e807b26cc0fcf89e5c451e1b038cdcc90d9'
             )
 validpgpkeys=(
               'ABAF11C65A2970B130ABE3C479BE3E4300411886' # Linus Torvalds
@@ -32,8 +38,19 @@ prepare() {
   cd "${srcdir}/${_srcname}"
 
   # Patch ACPI _REV to always return 2
-  msg "Patching acconfig.h"
+  msg "Applying patch to set ACPI _REV to 2"
   patch -Np1 -i "${srcdir}/acpi2.patch"
+
+  # Patch USB to prefer firmware values to determine if port is removable
+  # https://lkml.org/lkml/2015/4/8/745
+  msg "Applying usb hub patch to prefer firmware values to determine if port is removable"
+  patch -Np1 -i "${srcdir}/usb-hub.patch"
+
+  # Patches to set more reasonable defaults for AHCI power management
+  msg "Applying various patches to set more reasonable defaults for AHCI power management"
+  patch -Np1 -i "${srcdir}/libata1.patch"
+  patch -Np1 -i "${srcdir}/libata2.patch"
+  patch -Np1 -i "${srcdir}/libata3.patch"
 
   msg "Running make mrproper to clean source tree"
   make mrproper
@@ -73,16 +90,16 @@ build() {
   make ${MAKEFLAGS} bzImage modules
 }
 
-package_linux-xps13-9343() {
-  _Kpkgdesc='Arch Linux kernel patched for the Dell XPS13-9343 Ultrabook.'
+package_linux-xps13-9343-git() {
+  _Kpkgdesc='Arch Linux kernel patched for the Dell XPS13-9343-git Ultrabook.'
   pkgdesc="${_Kpkgdesc}"
   depends=('coreutils' 'linux-firmware' 'kmod' 'mkinitcpio>=0.7')
   optdepends=('crda: to set the correct wireless channels of your country')
   provides=("linux-xps13=${pkgver}")
-  conflicts=("kernel26-xps13-9343")
-  replaces=("kernel26-xps13-9343")
-  backup=("etc/mkinitcpio.d/linux-xps13-9343.preset")
-  install=linux-xps13-9343.install
+  conflicts=("kernel26-xps13-9343-git")
+  replaces=("kernel26-xps13-9343-git")
+  backup=("etc/mkinitcpio.d/linux-xps13-9343-git.preset")
+  install=linux-xps13-9343-git.install
 
   cd "${srcdir}/${_srcname}"
 
@@ -95,7 +112,7 @@ package_linux-xps13-9343() {
 
   mkdir -p "${pkgdir}"/{lib/modules,lib/firmware,boot}
   make INSTALL_MOD_PATH="${pkgdir}" modules_install
-  cp arch/$KARCH/boot/bzImage "${pkgdir}/boot/vmlinuz-linux-xps13-9343"
+  cp arch/$KARCH/boot/bzImage "${pkgdir}/boot/vmlinuz-linux-xps13-9343-git"
 
   # set correct depmod command for install
   cp -f "${startdir}/${install}" "${startdir}/${install}.pkg"
@@ -106,10 +123,10 @@ package_linux-xps13-9343() {
     -i "${startdir}/${install}"
 
   # install mkinitcpio preset file for kernel
-  install -D -m644 "${srcdir}/linux-xps13-9343.preset" "${pkgdir}/etc/mkinitcpio.d/linux-xps13-9343.preset"
+  install -D -m644 "${srcdir}/linux-xps13-9343-git.preset" "${pkgdir}/etc/mkinitcpio.d/linux-xps13-9343-git.preset"
   sed \
-    -e "1s|'linux.*'|'linux-xps13-9343'|" \
-    -e "s|ALL_kver=.*|ALL_kver=\"/boot/vmlinuz-linux-xps13-9343\"|" \
+    -e "1s|'linux.*'|'linux-xps13-9343-git'|" \
+    -e "s|ALL_kver=.*|ALL_kver=\"/boot/vmlinuz-linux-xps13-9343-git\"|" \
     -e "s|default_image=.*|default_image=\"/boot/initramfs-${pkgbase}.img\"|" \
     -e "s|fallback_image=.*|fallback_image=\"/boot/initramfs-${pkgbase}-fallback.img\"|" \
     -i "${pkgdir}/etc/mkinitcpio.d/${pkgbase}.preset"
@@ -121,10 +138,10 @@ package_linux-xps13-9343() {
   # gzip -9 all modules to save 100MB of space
   find "${pkgdir}" -name '*.ko' -exec gzip -9 {} \;
   # make room for external modules
-  ln -s "../extramodules-${_basekernel}${_kernelname:--xps13-9343}" "${pkgdir}/lib/modules/${_kernver}/extramodules"
+  ln -s "../extramodules-${_basekernel}${_kernelname:--xps13-9343-git}" "${pkgdir}/lib/modules/${_kernver}/extramodules"
   # add real version for building modules and running depmod from post_install/upgrade
-  mkdir -p "${pkgdir}/lib/modules/extramodules-${_basekernel}${_kernelname:--xps13-9343}"
-  echo "${_kernver}" > "${pkgdir}/lib/modules/extramodules-${_basekernel}${_kernelname:--xps13-9343}/version"
+  mkdir -p "${pkgdir}/lib/modules/extramodules-${_basekernel}${_kernelname:--xps13-9343-git}"
+  echo "${_kernver}" > "${pkgdir}/lib/modules/extramodules-${_basekernel}${_kernelname:--xps13-9343-git}/version"
 
   # Now we call depmod...
   depmod -b "${pkgdir}" -F System.map "${_kernver}"
@@ -137,13 +154,13 @@ package_linux-xps13-9343() {
   install -D -m644 vmlinux "${pkgdir}/usr/lib/modules/${_kernver}/build/vmlinux" 
 }
 
-package_linux-xps13-9343-headers() {
-  _Hpkgdesc='Header files for linux-xps13-9343.'
+package_linux-xps13-9343-headers-git() {
+  _Hpkgdesc='Header files for linux-xps13-9343-git.'
   pkgdesc="${_Hpkgdesc}"
-  depends=('linux-xps13-9343')
-  provides=("linux-xps13-9343-headers=${pkgver}" "linux-headers=${pkgver}")
-  conflicts=("kernel26-xps13-9343-headers")
-  replaces=("kernel26-xps13-9343-headers")
+  depends=('linux-xps13-9343-git')
+  provides=("linux-xps13-9343-headers-git=${pkgver}" "linux-headers=${pkgver}")
+  conflicts=("kernel26-xps13-9343-headers-git")
+  replaces=("kernel26-xps13-9343-headers-git")
 
   install -dm755 "${pkgdir}/usr/lib/modules/${_kernver}"
 
@@ -259,4 +276,4 @@ package_linux-xps13-9343-headers() {
 }
 
 # Global pkgdesc and depends are here so that they will be picked up by AUR
-pkgdesc='Linux kernel and modules with touchpad fix for XPS13-9343.'
+pkgdesc='Linux kernel and modules with touchpad fix for XPS13-9343-git.'
