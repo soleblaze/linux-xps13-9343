@@ -11,7 +11,7 @@ usage.
 
 ## Installation Steps
 
-    git clone https://github.com/soleblaze/linux-xps13-9343
+    git clone https://github.com/soleblaze/linux-xps13-9343 -b testing
     cd linux-xps13-9343
     makepkg -s
     sudo pacman -U *.pkg.tar.xz
