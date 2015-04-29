@@ -1,28 +1,30 @@
 # Maintainer: Kevin Burns <soleblaze_at_skyshadows_dot_net>
 
-pkgname=linux-xps13-9343-git
-true && pkgname=(linux-xps13-9343-git linux-xps13-9343-headers-git)
-_kernelname=-xps13-9343-git
-_srcname=linux
-pkgver=v4.0.r8110.g64fb1d0
+pkgname=linux-xps13-9343
+true && pkgname=(linux-xps13-9343 linux-xps13-9343-headers)
+_kernelname=-xps13-9343
+_srcname=linux-4.1-rc1
+pkgver=4.1rc1
 pkgrel=1
 arch=('x86_64')
-url="https://github.com/soleblaze/linux-xps13-9343-git-archlinux"
+url="https://github.com/soleblaze/linux-xps13-9343/tree/testing"
 license=('GPL2')
 makedepends=('xmlto' 'docbook-xsl' 'kmod' 'inetutils' 'bc')
 options=('!strip')
-source=('git+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git'
+source=("https://www.kernel.org/pub/linux/kernel/v4.x/testing/${_srcname}.tar.xz"
+        "https://www.kernel.org/pub/linux/kernel/v4.x/testing/${_srcname}.tar.sign"
         'config'
-        'linux-xps13-9343-git.preset'
+        'linux-xps13-9343.preset'
         'acpi2.patch'
         'usb-hub.patch'
         'libata1.patch'
         'libata2.patch'
         'libata3.patch'
         )
-sha256sums=('SKIP'
-            '608065e15788df7ecd6d101284886ade5194b38ede865108b4e7a82936c101aa'
-            '66f096df2183efcc36d10e74b145b46bbca1986a33a72e8e9f688afcea37bdc2'
+sha256sums=('ad30def836c0d538c81814cfa49127f745835a921be38d9591443e0e146c1c34'
+            'SKIP'
+            '28466e96a9cd85bdb3f535d835014efdd9799769bec3d1e1dfba546433eea610'
+            '9cf72e965ed8e766be3f6eed74f07a4f5cc696d7175b1ab8c608925202591ca2'
             'affd92d3ec9f46ab78665cd925cefec63b08291e1d851785507b3bd7f710a152'
             '59b84757b6aed70bb0cfec993ed758f42853bccda76edeaf9bebec1eff51c0bc'
             '65996661b01e55b5ad9383bc57073b2a62de39b0bd3f58d589ecccdc0942754a'
@@ -90,16 +92,16 @@ build() {
   make ${MAKEFLAGS} bzImage modules
 }
 
-package_linux-xps13-9343-git() {
-  _Kpkgdesc='Arch Linux kernel patched for the Dell XPS13-9343-git Ultrabook.'
+package_linux-xps13-9343() {
+  _Kpkgdesc='Arch Linux kernel patched for the Dell XPS13-9343 Ultrabook.'
   pkgdesc="${_Kpkgdesc}"
   depends=('coreutils' 'linux-firmware' 'kmod' 'mkinitcpio>=0.7')
   optdepends=('crda: to set the correct wireless channels of your country')
   provides=("linux-xps13=${pkgver}")
-  conflicts=("kernel26-xps13-9343-git")
-  replaces=("kernel26-xps13-9343-git")
-  backup=("etc/mkinitcpio.d/linux-xps13-9343-git.preset")
-  install=linux-xps13-9343-git.install
+  conflicts=("kernel26-xps13-9343")
+  replaces=("kernel26-xps13-9343")
+  backup=("etc/mkinitcpio.d/linux-xps13-9343.preset")
+  install=linux-xps13-9343.install
 
   cd "${srcdir}/${_srcname}"
 
@@ -112,7 +114,7 @@ package_linux-xps13-9343-git() {
 
   mkdir -p "${pkgdir}"/{lib/modules,lib/firmware,boot}
   make INSTALL_MOD_PATH="${pkgdir}" modules_install
-  cp arch/$KARCH/boot/bzImage "${pkgdir}/boot/vmlinuz-linux-xps13-9343-git"
+  cp arch/$KARCH/boot/bzImage "${pkgdir}/boot/vmlinuz-linux-xps13-9343"
 
   # set correct depmod command for install
   cp -f "${startdir}/${install}" "${startdir}/${install}.pkg"
@@ -123,10 +125,10 @@ package_linux-xps13-9343-git() {
     -i "${startdir}/${install}"
 
   # install mkinitcpio preset file for kernel
-  install -D -m644 "${srcdir}/linux-xps13-9343-git.preset" "${pkgdir}/etc/mkinitcpio.d/linux-xps13-9343-git.preset"
+  install -D -m644 "${srcdir}/linux-xps13-9343.preset" "${pkgdir}/etc/mkinitcpio.d/linux-xps13-9343.preset"
   sed \
-    -e "1s|'linux.*'|'linux-xps13-9343-git'|" \
-    -e "s|ALL_kver=.*|ALL_kver=\"/boot/vmlinuz-linux-xps13-9343-git\"|" \
+    -e "1s|'linux.*'|'linux-xps13-9343'|" \
+    -e "s|ALL_kver=.*|ALL_kver=\"/boot/vmlinuz-linux-xps13-9343\"|" \
     -e "s|default_image=.*|default_image=\"/boot/initramfs-${pkgbase}.img\"|" \
     -e "s|fallback_image=.*|fallback_image=\"/boot/initramfs-${pkgbase}-fallback.img\"|" \
     -i "${pkgdir}/etc/mkinitcpio.d/${pkgbase}.preset"
@@ -138,10 +140,10 @@ package_linux-xps13-9343-git() {
   # gzip -9 all modules to save 100MB of space
   find "${pkgdir}" -name '*.ko' -exec gzip -9 {} \;
   # make room for external modules
-  ln -s "../extramodules-${_basekernel}${_kernelname:--xps13-9343-git}" "${pkgdir}/lib/modules/${_kernver}/extramodules"
+  ln -s "../extramodules-${_basekernel}${_kernelname:--xps13-9343}" "${pkgdir}/lib/modules/${_kernver}/extramodules"
   # add real version for building modules and running depmod from post_install/upgrade
-  mkdir -p "${pkgdir}/lib/modules/extramodules-${_basekernel}${_kernelname:--xps13-9343-git}"
-  echo "${_kernver}" > "${pkgdir}/lib/modules/extramodules-${_basekernel}${_kernelname:--xps13-9343-git}/version"
+  mkdir -p "${pkgdir}/lib/modules/extramodules-${_basekernel}${_kernelname:--xps13-9343}"
+  echo "${_kernver}" > "${pkgdir}/lib/modules/extramodules-${_basekernel}${_kernelname:--xps13-9343}/version"
 
   # Now we call depmod...
   depmod -b "${pkgdir}" -F System.map "${_kernver}"
@@ -154,13 +156,13 @@ package_linux-xps13-9343-git() {
   install -D -m644 vmlinux "${pkgdir}/usr/lib/modules/${_kernver}/build/vmlinux" 
 }
 
-package_linux-xps13-9343-headers-git() {
-  _Hpkgdesc='Header files for linux-xps13-9343-git.'
+package_linux-xps13-9343-headers() {
+  _Hpkgdesc='Header files for linux-xps13-9343.'
   pkgdesc="${_Hpkgdesc}"
-  depends=('linux-xps13-9343-git')
-  provides=("linux-xps13-9343-headers-git=${pkgver}" "linux-headers=${pkgver}")
-  conflicts=("kernel26-xps13-9343-headers-git")
-  replaces=("kernel26-xps13-9343-headers-git")
+  depends=('linux-xps13-9343')
+  provides=("linux-xps13-9343-headers=${pkgver}" "linux-headers=${pkgver}")
+  conflicts=("kernel26-xps13-9343-headers")
+  replaces=("kernel26-xps13-9343-headers")
 
   install -dm755 "${pkgdir}/usr/lib/modules/${_kernver}"
 
@@ -276,4 +278,4 @@ package_linux-xps13-9343-headers-git() {
 }
 
 # Global pkgdesc and depends are here so that they will be picked up by AUR
-pkgdesc='Linux kernel and modules with touchpad fix for XPS13-9343-git.'
+pkgdesc='Linux kernel and modules with touchpad fix for XPS13-9343.'
