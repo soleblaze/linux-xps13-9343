@@ -2,7 +2,7 @@
 
 This package currently patches 4.1-rc1 in order to get sound working correctly in i2s mode.  SPX Mux needs to be set to Front and SP0 needs to be unmuted in order for sound to work properly.
 
-This also includes some AHCI and usb hubpatches in order to lower power usage. The PSR patches are  causing some screen issues. If you wish to try it, edit the PKGBUILD and uncomment the psr patch line.
+This also includes some AHCI and usb hubpatches in order to lower power usage. The PSR patches are causing some screen issues. If you wish to try it, edit the PKGBUILD and uncomment the psr patch line.
 
 ## Not yet working
 
