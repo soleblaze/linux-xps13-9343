@@ -59,8 +59,8 @@ prepare() {
 
   # Patches for intel psr testing
   # http://cgit.freedesktop.org/~vivijim/drm-intel/log/?h=intel_psr
-  msg "Applying intel psr patches to help lower gpu and monitor power usage"
-  patch -Np1 -i "${srcdir}/psr.patch"
+  #msg "Applying intel psr patches to help lower gpu and monitor power usage"
+  #patch -Np1 -i "${srcdir}/psr.patch"
 
   msg "Running make mrproper to clean source tree"
   make mrproper
