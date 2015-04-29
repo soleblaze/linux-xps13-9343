@@ -20,6 +20,7 @@ source=("https://www.kernel.org/pub/linux/kernel/v4.x/testing/${_srcname}.tar.xz
         'libata1.patch'
         'libata2.patch'
         'libata3.patch'
+        'psr.patch'
         )
 sha256sums=('ad30def836c0d538c81814cfa49127f745835a921be38d9591443e0e146c1c34'
             'SKIP'
@@ -30,6 +31,7 @@ sha256sums=('ad30def836c0d538c81814cfa49127f745835a921be38d9591443e0e146c1c34'
             '65996661b01e55b5ad9383bc57073b2a62de39b0bd3f58d589ecccdc0942754a'
             'af01200ecb94d2c87f9f1fbf5fd46962125a552f50826d4b5707ec89a930e14d'
             '377d801f2003660d5c09b06157419e807b26cc0fcf89e5c451e1b038cdcc90d9'
+            'cd14f9fb5ac914f4a4228b55e1967ac0826709c0a6addec0b2bc5bfe406105ad'
             )
 validpgpkeys=(
               'ABAF11C65A2970B130ABE3C479BE3E4300411886' # Linus Torvalds
@@ -53,6 +55,9 @@ prepare() {
   patch -Np1 -i "${srcdir}/libata1.patch"
   patch -Np1 -i "${srcdir}/libata2.patch"
   patch -Np1 -i "${srcdir}/libata3.patch"
+
+  msg "Applying intel psr patches to help lower gpu and monitor power usage"
+  patch -Np1 -i "${srcdir}/psr.patch"
 
   msg "Running make mrproper to clean source tree"
   make mrproper
