@@ -51,11 +51,14 @@ prepare() {
   patch -Np1 -i "${srcdir}/usb-hub.patch"
 
   # Patches to set more reasonable defaults for AHCI power management
+  # https://lkml.org/lkml/2015/4/18/76
   msg "Applying various patches to set more reasonable defaults for AHCI power management"
   patch -Np1 -i "${srcdir}/libata1.patch"
   patch -Np1 -i "${srcdir}/libata2.patch"
   patch -Np1 -i "${srcdir}/libata3.patch"
 
+  # Patches for intel psr testing
+  # http://cgit.freedesktop.org/~vivijim/drm-intel/log/?h=intel_psr
   msg "Applying intel psr patches to help lower gpu and monitor power usage"
   patch -Np1 -i "${srcdir}/psr.patch"
 
