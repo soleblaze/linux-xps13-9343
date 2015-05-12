@@ -3,8 +3,8 @@
 pkgname=linux-xps13-9343
 true && pkgname=(linux-xps13-9343 linux-xps13-9343-headers)
 _kernelname=-xps13-9343
-_srcname=linux-4.1-rc1
-pkgver=4.1rc1
+_srcname=linux-4.1-rc3
+pkgver=4.1rc3
 pkgrel=1
 arch=('x86_64')
 url="https://github.com/soleblaze/linux-xps13-9343/tree/testing"
@@ -22,9 +22,9 @@ source=("https://www.kernel.org/pub/linux/kernel/v4.x/testing/${_srcname}.tar.xz
         'libata3.patch'
         'psr.patch'
         )
-sha256sums=('ad30def836c0d538c81814cfa49127f745835a921be38d9591443e0e146c1c34'
+sha256sums=('499278d36cf8407ed1d054d72458a5c1e98cb00e03508c8daada377f4838e78d'
             'SKIP'
-            '28466e96a9cd85bdb3f535d835014efdd9799769bec3d1e1dfba546433eea610'
+            '12329e9a5e5afdfd25cb2fa8e748ce579cc0d92efa85cfe9c3f69e5f2734efd7'
             '9cf72e965ed8e766be3f6eed74f07a4f5cc696d7175b1ab8c608925202591ca2'
             'affd92d3ec9f46ab78665cd925cefec63b08291e1d851785507b3bd7f710a152'
             '59b84757b6aed70bb0cfec993ed758f42853bccda76edeaf9bebec1eff51c0bc'
