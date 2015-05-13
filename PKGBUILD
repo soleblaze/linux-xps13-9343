@@ -16,7 +16,7 @@ source=("https://www.kernel.org/pub/linux/kernel/v4.x/testing/${_srcname}.tar.xz
         'config'
         'linux-xps13-9343.preset'
         'acpi2.patch'
-        'usb-hub.patch'
+        'usb-hub1.patch'
         'libata1.patch'
         'libata2.patch'
         'libata3.patch'
@@ -48,7 +48,7 @@ prepare() {
   # Patch USB to prefer firmware values to determine if port is removable
   # https://lkml.org/lkml/2015/4/8/745
   msg "Applying usb hub patch to prefer firmware values to determine if port is removable"
-  patch -Np1 -i "${srcdir}/usb-hub.patch"
+  patch -Np1 -i "${srcdir}/usb-hub1.patch"
 
   # Patches to set more reasonable defaults for AHCI power management
   # https://lkml.org/lkml/2015/4/18/76
