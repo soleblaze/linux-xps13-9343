@@ -5,7 +5,7 @@ true && pkgname=(linux-xps13-9343 linux-xps13-9343-headers)
 _kernelname=-xps13-9343
 _srcname=linux-4.1-rc3
 pkgver=4.1rc3
-pkgrel=1
+pkgrel=2
 arch=('x86_64')
 url="https://github.com/soleblaze/linux-xps13-9343/tree/testing"
 license=('GPL2')
@@ -17,6 +17,7 @@ source=("https://www.kernel.org/pub/linux/kernel/v4.x/testing/${_srcname}.tar.xz
         'linux-xps13-9343.preset'
         'acpi2.patch'
         'usb-hub1.patch'
+        'usb-hub2.patch'
         'libata1.patch'
         'libata2.patch'
         'libata3.patch'
@@ -28,6 +29,7 @@ sha256sums=('499278d36cf8407ed1d054d72458a5c1e98cb00e03508c8daada377f4838e78d'
             '9cf72e965ed8e766be3f6eed74f07a4f5cc696d7175b1ab8c608925202591ca2'
             'affd92d3ec9f46ab78665cd925cefec63b08291e1d851785507b3bd7f710a152'
             '59b84757b6aed70bb0cfec993ed758f42853bccda76edeaf9bebec1eff51c0bc'
+            '76da07590ebf342605e9e22c633e8b2d6a0a9c492942f3607f71ed7ba7b4f318'
             '65996661b01e55b5ad9383bc57073b2a62de39b0bd3f58d589ecccdc0942754a'
             'af01200ecb94d2c87f9f1fbf5fd46962125a552f50826d4b5707ec89a930e14d'
             '377d801f2003660d5c09b06157419e807b26cc0fcf89e5c451e1b038cdcc90d9'
@@ -49,6 +51,7 @@ prepare() {
   # https://lkml.org/lkml/2015/4/8/745
   msg "Applying usb hub patch to prefer firmware values to determine if port is removable"
   patch -Np1 -i "${srcdir}/usb-hub1.patch"
+  patch -Np1 -i "${srcdir}/usb-hub2.patch"
 
   # Patches to set more reasonable defaults for AHCI power management
   # https://lkml.org/lkml/2015/4/18/76
