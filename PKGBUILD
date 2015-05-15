@@ -47,11 +47,12 @@ prepare() {
   msg "Applying patch to set ACPI _REV to 2"
   patch -Np1 -i "${srcdir}/acpi2.patch"
 
+  # DISABLED: This breaks the touchpad (probably just usb-hub2)
   # Patch USB to prefer firmware values to determine if port is removable
   # https://lkml.org/lkml/2015/4/8/745
   msg "Applying usb hub patch to prefer firmware values to determine if port is removable"
-  patch -Np1 -i "${srcdir}/usb-hub1.patch"
-  patch -Np1 -i "${srcdir}/usb-hub2.patch"
+  #patch -Np1 -i "${srcdir}/usb-hub1.patch"
+  #patch -Np1 -i "${srcdir}/usb-hub2.patch"
 
   # Patches to set more reasonable defaults for AHCI power management
   # https://lkml.org/lkml/2015/4/18/76
@@ -60,6 +61,7 @@ prepare() {
   patch -Np1 -i "${srcdir}/libata2.patch"
   patch -Np1 -i "${srcdir}/libata3.patch"
 
+  # DISABLED: This currently flickers.
   # Patches for intel psr testing
   # http://cgit.freedesktop.org/~vivijim/drm-intel/log/?h=intel_psr
   #msg "Applying intel psr patches to help lower gpu and monitor power usage"
