@@ -1,16 +1,3 @@
-# XPS 13 9343 Kernel Package
+# Package is no longer maintained
 
-This package currently patches 4.0 in order to get sound working correctly in i2s mode.  SPX Mux needs to be set to Front and SP0 needs to be unmuted in order for sound to work properly.
-
-## Not yet working
-
-* palm detection
-
-## Installation Steps
-
-    git clone https://github.com/soleblaze/linux-xps13-9343
-    cd linux-xps13-9343
-    makepkg -s
-    sudo pacman -U *.pkg.tar.xz
-
-Note: You will need to set your bootloader to use this kernel on boot.
+Please use the main arch linux kernel package. All of the hardware for the Dell XPS 13 9343 should work without any kernel modifications. 
